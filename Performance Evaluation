@@ -1,0 +1,64 @@
+import timeit
+import hashlib
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+start = '''
+import timeit
+import hashlib
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+'''
+stop = '''
+digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+digest.update(bytes(256*1000*1000))
+digest.finalize()
+'''
+start1 = '''
+import timeit
+import hashlib
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+'''
+stop1 = '''
+digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+digest.update(bytes(256*1000*1000))
+digest.finalize()
+'''
+def SHA_512(message):
+ hash_object = hashlib.sha512(message)
+ digest = hashes.Hash(hashes.SHA512(), backend=default_backend()) # Initializing the hashing
+function to be used
+ digest.update(message) # Hashing of the message is done
+ msg_digest = digest.finalize() # Finalizing the current context and returning the digest in bytes
+ return msg_digest
+def SHA_256(message):
+ hash_object = hashlib.sha256(message)
+ digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+ digest.update(message)
+ msg_digest = digest.finalize()
+ return msg_digest
+if __name__ == "__main__":
+ byte_plaintext = bytes(1000*1000*256 - 33) #33 bytes are subtracted because of the extra byte
+header
+ digest = SHA_256(byte_plaintext)
+ digest_hex = digest.hex()
+ digest1 = SHA_512(byte_plaintext)
+ digest_hex1 = digest1.hex() # Converting the digest returned in bytes format to hexadecimal format 
+  print("Representation of SHA256 of 256MB zeros")
+ print("The Message digest after SHA256 hashing is: \n{} ".format(digest_hex))
+ total_time = timeit.timeit(setup=start, stmt=stop, number=10)
+ exec_time = total_time/10
+ print("The Average Time taken for Hashing the plaintext: {} seconds".format(exec_time))
+ perf = 256/exec_time
+ print("The performance of the hashing function is {} MB/s".format(perf))
+ print("Representation of SHA512 of 256MB zeros")
+ print("The Message digest after SHA512 hashing is: \n{} ".format(digest_hex1))
+ total_time1 = timeit.timeit(setup=start1, stmt=stop1, number=10) # running the hash function 10
+times and obtaining total time elapsed
+ exec_time1 = total_time1/10
+ print("The Average Time taken for Hashing the plaintext: {} seconds".format(exec_time1))
+ perf1 = 256/exec_time1
+ print("The performance of the hashing function is {} MB/s".format(perf1))
+ 
+ 
+ 
