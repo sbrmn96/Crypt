@@ -1,0 +1,21 @@
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+import os
+if __name__ == "__main__":
+14
+ backend = default_backend()
+ key = os.urandom(16)
+ init_vector = os.urandom(16)
+ cpt = Cipher(algorithms.AES(key), modes.CBC(init_vector), backend=backend)
+ encryptor = cpt.encryptor()
+ buffer = bytearray(31)
+ pt = b'a secret message'
+ len_encrypted = encryptor.update_into(pt, buffer)
+ ciphertext = bytes(buffer[:len_encrypted]) + encryptor.finalize()
+ decryptor = cpt.decryptor()
+ len_decrypted = decryptor.update_into(ciphertext, buffer)
+ decrypted_msg = bytes(buffer[:len_decrypted]) + decryptor.finalize()
+ print("AES in CBC mode with padding: ")
+ print("The Plaintext is{}".format(pt.hex()))
+ print("The CipherText: {}".format(ciphertext.hex()))
+ print("The Final Decrypted Message: {}".format(decrypted_msg.decode('utf-8')))
