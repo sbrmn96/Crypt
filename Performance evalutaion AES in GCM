@@ -1,0 +1,45 @@
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import (
+ Cipher, algorithms, modes
+)
+
+import time
+import os
+def decryption(key, ad, iv, ct, tag):
+ decryptor = Cipher( algorithms.AES(key), modes.GCM(iv, tag),
+backend=default_backend()).decryptor()
+ decryptor.authenticate_additional_data(ad)
+ return decryptor.update(ct) + decryptor.finalize()
+def encryption(key, pt, ad):
+ iv = os.urandom(12)
+ encryptor =
+Cipher(algorithms.AES(key),modes.GCM(iv),backend=default_backend()).encryptor()
+ encryptor.authenticate_additional_data(ad)
+ ct = encryptor.update(pt) + encryptor.finalize()
+ return (iv, ct, encryptor.tag)
+if __name__ == "__main__":
+ plaintext = bytes(64*1000*1000 - 33) #The number 33 is subtracted from the byte header and
+64 MB is calculated
+ ad = b"Data that is authenticated but not encrypted"
+ ad_str = ad.decode("utf-8") # UTF-8 is used as Unicode Character
+ encryption_start = time.time()
+ for i in range(0, 10):
+ key = os.urandom(32)
+ iv, cpt, tag = encryption(key, plaintext, ad)
+ encryption_end = time.time()
+ encrypt_time = encryption_end - encryption_start
+ avg_time = encrypt_time/10
+ encrypt_perf = 64/avg_time
+ decrypt_start = time.time()
+ for i in range(0, 10):
+ decryted_msg = decryption(key, ad, iv, cpt, tag)
+ decrypt_end = time.time()
+ decrypt_elapsed_time = decrypt_end - decrypt_start
+ avg_decrypt_elapsed_time = decrypt_elapsed_time/10
+ decrypt_perf = 64/avg_decrypt_elapsed_time
+ print("THE AES in GCM mode 64MB 0x0")
+ print("The Elapsed time for encryption of 64MB 0x0 is {} sec".format(round(avg_time, 5)))
+ print("The Performance of Encryption is= {} MB/s".format(round(encrypt_perf, 5)))
+ print("The Elapsed time for decryption of 64MB 0x0= {}
+sec".format(round(avg_decrypt_elapsed_time, 5)))
+ print("The Performance of Decryption is= {} MB/s".format(round(decrypt_perf, 5)))
