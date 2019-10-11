@@ -1,0 +1,35 @@
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import (
+Cipher, algorithms, modes
+)
+import os
+def decryption(key, ad, iv, cpt, tag):
+ decryptor = Cipher( algorithms.AES(key),modes.GCM(iv, tag),
+backend=default_backend()).decryptor()
+ decryptor.authenticate_additional_data(ad)
+ return decryptor.update(cpt) + decryptor.finalize()
+def encryption(key, pt, ad):
+ iv = os.urandom(12)
+ encryptor = Cipher(algorithms.AES(key),
+modes.GCM(iv),backend=default_backend()).encryptor()
+ encryptor.authenticate_additional_data(ad)
+ cpt = encryptor.update(pt) + encryptor.finalize()
+ return (iv, cpt, encryptor.tag)
+if __name__ == "__main__":
+ pt = b'Hello world!' #plaintext is given as Hello World!
+ pt_str = pt.decode('utf-8')
+ ad = b"Authenticated Data"
+ ad_str = ad.decode("utf-8")
+ key = os.urandom(32)
+ iv, cpt, tag = encryption(key, pt, ad) 
+11
+ attack_tag = bytes(16) #the attacking tag is taken consisting of 16 bytes
+ decrypted_msg = decryption(key, ad, iv, cpt, attack_tag)
+ print("InvalidTag! The MAC tags of encryption and decryption donot match") #Invalid tag
+shows up when there is an attacking tag
+ print("The AES in GCM mode of plaintext: {}".format(plaintext_str))
+ print("The Authenticated Associated data is {}".format(ad_str))
+ print("The Initialization Vector is {}".format(iv.hex()))
+ print("MAC tag is {}".format(tag.hex()))
+ print("Ciphertext is {}".format(cpt.hex()))
+ print("The final Decrypted message is {}".format(decrypted_msg.decode('utf-8')))
