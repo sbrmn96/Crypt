@@ -1,0 +1,36 @@
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import (
+ Cipher, algorithms, modes
+)
+import os
+def decryption(key, ad, iv, cpt, tag): # decrypting the cipher text and values
+ decryptor = Cipher(algorithms.AES(key), modes.GCM(iv, tag),
+backend=default_backend()).decryptor()
+ decryptor.authenticate_additional_data(ad)
+ return decryptor.update(cpt) + decryptor.finalize()
+def encryption(key, plt, ad): #Encryption involving the Key, PlainText and additional
+authenticated data
+ iv = os.urandom(12) #IV consisting of random values
+ encryptor = Cipher(algorithms.AES(key),modes.GCM(iv),
+backend=default_backend()).encryptor() #the encryptor function
+ encryptor.authenticate_additional_data(ad) #authenticating data for the encryptor
+ cpt = encryptor.update(plt) + encryptor.finalize() # The cipher text is gained
+9
+ return (iv, cpt, encryptor.tag) #key is encrypted as IV, plaintext becomes Cipher text and aad is
+tag
+if __name__ == "__main__":
+ plaintext = b'Hello World!'
+ plaintext_str = plaintext.decode('utf-8') #utf-8 is a variable width character used similar to
+ascii character
+ ad = b"Authenticated data"
+ ad_str = ad.decode("utf-8")
+ key = os.urandom(32)
+ iv, ciphertext, tag = encryption(key, plaintext, ad)
+ decryted_msg = decryption(key, ad, iv, ciphertext, tag)
+print("AES in GCM mode")
+print("The plaintext is given as {}".format(plaintext_str))
+print("The MAC tag is {}".format(tag.hex()))
+print("The Ciphertext is {}".format(ciphertext.hex()))
+print("The Authenticated Associated data is {}".format(ad_str))
+print("The Initialization Vector is {}".format(iv.hex()))
+print("The Final Decrypted message is {}".format(decryted_msg.decode('utf-8')))
