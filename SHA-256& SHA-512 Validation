@@ -1,0 +1,17 @@
+import hashlib
+def encrypt_string(hash_string):
+ sign = \
+ hashlib.sha256(hash_string.encode()).hexdigest()
+ return sign
+hash_string = 'Hello world!'
+sha_signature = encrypt_string(hash_string)
+print("The SHA 256 for Hello World! is: {}".format(sha_signature))
+print("---")
+def encrypt_string1(hash_string1):
+ sign1 = \
+ hashlib.sha512(hash_string1.encode()).hexdigest()
+ return sign1
+hash_string1 = 'Hello world!'
+sha_signature1 = encrypt_string1(hash_string1)
+print("The SHA 512 for Hello World! is: {}".format(sha_signature1))
+print(sha_signature1)
