@@ -1,0 +1,30 @@
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+import os
+import time
+if __name__ == "__main__":
+ backend = default_backend()
+ key = os.urandom(16) # 128 bit key
+ init_vector = os.urandom(16)
+ cpt = Cipher(algorithms.AES(key), modes.CBC(init_vector), backend=backend)
+ encryptor = cpt.encryptor()
+ buf = bytearray(64000160)
+ plaintext = bytes(64*1000*1000)
+ start1 = time.time()
+ len_encrypted = encryptor.update_into(plaintext, buf)
+ ciphertext = bytes(buf[:len_encrypted]) + encryptor.finalize()
+ end1 = time.time()
+ total_time = end1 - start1
+ perf = 64/total_time
+ start2 = time.time()
+ decryptor = cpt.decryptor()
+ length = decryptor.update_into(ciphertext, buf)
+ decrypted_msg = bytes(buf[:length]) + decryptor.finalize()
+ end2 = time.time()
+ tt = end2 - start2
+ performance = 64/tt
+ print("The AES in CBC mode with padding of 64MB 0x0")
+ print("The Time taken for encryption: {} secs".format(total_time))
+ print("The Performance of encryption: {} MB/s".format(perf))
+ print("The Time taken for decryption: {} secs".format(tt))
+ print("The Performance of decryption: {} MB/s".format(performance))
